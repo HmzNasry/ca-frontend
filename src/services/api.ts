@@ -1,6 +1,14 @@
 const API_BASE_URL = "https://ca-backend-eujk.onrender.com";
 const apiUrl = (path: string) => `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 
+export async function pingHealth(): Promise<void> {
+  try {
+    await fetch(apiUrl("/health"), { method: "GET", cache: "no-store" });
+  } catch {
+    // Ignore failures; health pings are best-effort.
+  }
+}
+
 export async function loginUser(username: string, password: string) {
   const r = await fetch(apiUrl("/login"), {
     method: "POST",

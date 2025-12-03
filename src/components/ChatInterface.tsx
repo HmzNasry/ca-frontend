@@ -490,6 +490,20 @@ export function ChatInterface({ token, onLogout }: { token: string; onLogout: ()
   }, []);
 
   useEffect(() => {
+    let healthTimer: number | null = null;
+    const ping = () => {
+      if (!document.hidden) {
+        api.pingHealth();
+      }
+    };
+    ping();
+    healthTimer = window.setInterval(ping, 5 * 60 * 1000);
+    return () => {
+      if (healthTimer) window.clearInterval(healthTimer);
+    };
+  }, []);
+
+  useEffect(() => {
     const payload = JSON.parse(atob(token.split(".")[1]));
     setMe(payload.sub);
     setRole(payload.role || "user");
