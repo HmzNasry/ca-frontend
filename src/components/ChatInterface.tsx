@@ -495,8 +495,10 @@ export function ChatInterface({ token, onLogout }: { token: string; onLogout: ()
     setRole(payload.role || "user");
     const currentUser = payload.sub;
 
-    const proto = location.protocol === "https:" ? "wss" : "ws";
-    ws.current = new WebSocket(`${proto}://${location.host}/ws/${token}`);
+    const wsBase =
+      import.meta.env.VITE_WS_BASE_URL ||
+      (location.protocol === "https:" ? "wss://ca-backend-eujk.onrender.com" : "ws://localhost:8000");
+    ws.current = new WebSocket(`${wsBase.replace(/\/$/, "")}/ws/${token}`);
 
     ws.current.onmessage = e => {
       const d = JSON.parse(e.data);
