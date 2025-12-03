@@ -1,5 +1,8 @@
+const API_BASE_URL = "https://ca-backend-eujk.onrender.com";
+const apiUrl = (path: string) => `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+
 export async function loginUser(username: string, password: string) {
-  const r = await fetch("/login", {
+  const r = await fetch(apiUrl("/login"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, server_password: password })
@@ -10,7 +13,7 @@ export async function loginUser(username: string, password: string) {
 
 export async function isUsernameAvailable(name: string): Promise<boolean> {
   const q = encodeURIComponent(name || "");
-  const r = await fetch(`/user-available?name=${q}`);
+  const r = await fetch(apiUrl(`/user-available?name=${q}`));
   if (!r.ok) return true; // don't block if server can't check
   const d = await r.json();
   return !!d.available;
@@ -18,7 +21,7 @@ export async function isUsernameAvailable(name: string): Promise<boolean> {
 
 // Account-based auth (new)
 export async function signUpUser(username: string, displayName: string, password: string): Promise<string> {
-  const r = await fetch("/signup", {
+  const r = await fetch(apiUrl("/signup"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, display_name: displayName, password })
@@ -31,7 +34,7 @@ export async function signUpUser(username: string, displayName: string, password
 }
 
 export async function signInUser(username: string, password: string): Promise<string> {
-  const r = await fetch("/signin", {
+  const r = await fetch(apiUrl("/signin"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password })
@@ -45,7 +48,7 @@ export async function signInUser(username: string, password: string): Promise<st
 
 export async function isAccountAvailable(name: string): Promise<boolean> {
   const q = encodeURIComponent(name || "");
-  const r = await fetch(`/account-available?name=${q}`);
+  const r = await fetch(apiUrl(`/account-available?name=${q}`));
   if (!r.ok) return true;
   const d = await r.json();
   return !!d.available;
@@ -54,13 +57,13 @@ export async function isAccountAvailable(name: string): Promise<boolean> {
 export type AccountInfo = { username: string; display_name: string; created_at?: string | null; last_seen_ip?: string | null };
 
 export async function getAccount(token: string): Promise<AccountInfo> {
-  const r = await fetch("/account", { headers: { Authorization: `Bearer ${token}` } });
+  const r = await fetch(apiUrl("/account"), { headers: { Authorization: `Bearer ${token}` } });
   if (!r.ok) throw new Error("failed to load account");
   return await r.json();
 }
 
 export async function updateAccount(token: string, data: { username?: string | null; display_name?: string | null; password?: string | null }): Promise<string> {
-  const r = await fetch("/account/update", {
+  const r = await fetch(apiUrl("/account/update"), {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify(data)
@@ -73,7 +76,7 @@ export async function updateAccount(token: string, data: { username?: string | n
 }
 
 export async function deleteAccount(token: string): Promise<boolean> {
-  const r = await fetch("/account/delete", {
+  const r = await fetch(apiUrl("/account/delete"), {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -88,7 +91,7 @@ export async function deleteAccount(token: string): Promise<boolean> {
 // Admin (DEV) account management
 export async function getAccountAdmin(token: string, username: string): Promise<AccountInfo> {
   const q = encodeURIComponent(username);
-  const r = await fetch(`/admin/account?username=${q}`, { headers: { Authorization: `Bearer ${token}` } });
+  const r = await fetch(apiUrl(`/admin/account?username=${q}`), { headers: { Authorization: `Bearer ${token}` } });
   if (!r.ok) {
     const msg = (await r.json().catch(() => ({} as any))).detail || "failed to load account";
     throw new Error(msg);
@@ -98,7 +101,7 @@ export async function getAccountAdmin(token: string, username: string): Promise<
 
 export async function updateAccountAdmin(token: string, username: string, data: { username?: string | null; display_name?: string | null; password?: string | null }): Promise<AccountInfo> {
   const q = encodeURIComponent(username);
-  const r = await fetch(`/admin/account/update?username=${q}`, {
+  const r = await fetch(apiUrl(`/admin/account/update?username=${q}`), {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify(data)
@@ -112,7 +115,7 @@ export async function updateAccountAdmin(token: string, username: string, data: 
 
 export async function deleteAccountAdmin(token: string, username: string): Promise<boolean> {
   const q = encodeURIComponent(username);
-  const r = await fetch(`/admin/account/delete?username=${q}`, {
+  const r = await fetch(apiUrl(`/admin/account/delete?username=${q}`), {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -168,7 +171,7 @@ async function postForm(f: File, ctx?: UploadCtx) {
   if (ctx?.peer) fd.append("peer", ctx.peer);
   if (ctx?.user) fd.append("user", ctx.user);
   if (ctx?.gcid) fd.append("gcid", ctx.gcid);
-  const r = await fetch("/upload", { method: "POST", body: fd });
+  const r = await fetch(apiUrl("/upload"), { method: "POST", body: fd });
   return r;
 }
 
@@ -204,4 +207,3 @@ export async function uploadFile(f: File, ctx?: UploadCtx) {
   const text = r.status === 413 ? "upload too large (proxy limit)" : "upload failed";
   throw new Error(text);
 }
-
