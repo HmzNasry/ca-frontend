@@ -282,7 +282,15 @@ export function ChatInterface({ token, onLogout }: { token: string; onLogout: ()
   const myTagObj = typeof myTagVal === 'string' ? { text: myTagVal, color: 'white' } : (myTagVal || null);
   const isDevMe = !!(myTagObj && (myTagObj as any).special === 'dev');
   const isAdminEffective = isAdmin || isDevMe;
-  const full = (url: string) => (url.startsWith("/") ? location.origin + url : url);
+  const backendOrigin = (
+    import.meta.env.VITE_MEDIA_BASE_URL ||
+    import.meta.env.VITE_API_BASE_URL ||
+    "https://ca-backend-eujk.onrender.com"
+  ).replace(/\/$/, "");
+  const full = useCallback(
+    (url: string) => (url.startsWith("/") ? `${backendOrigin}${url}` : url),
+    [backendOrigin]
+  );
 
   // Ask for notification permission on mount
   useEffect(() => {
