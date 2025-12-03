@@ -12,15 +12,15 @@ export default defineConfig({
   server: {
     proxy: {
       "/upload": {
-        target: "http://localhost:8000",
+        target: "https://ca-backend-eujk.onrender.com",
         changeOrigin: true,
       },
       "/files": {
-        target: "http://localhost:8000",
+        target: "https://ca-backend-eujk.onrender.com",
         changeOrigin: true,
       },
       "/ws": {
-        target: "ws://localhost:8000",
+        target: "https://ca-backend-eujk.onrender.com",
         ws: true,
         changeOrigin: true,
       },
